@@ -60,13 +60,14 @@ function JekyllSchedulePost(){
                         $imagePath = $imagePath -replace "/", "\"
 
                         # Create scheduled task - git add, git commit, git push
-                        $gitActions = @()
-                        $gitActions += New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-windowstyle hidden -noni -nop -command & git -C $gitDir add $gitDir\$post"
                         if($imagePath -ne ""){
-                            $gitActions += New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-windowstyle hidden -noni -nop -command & git -C $gitDir add $gitDir\$imagePath"
+                            $gitActions = New-ScheduledTaskAction -Execute "powershell.exe" -Argument `
+                            "-windowstyle hidden -noni -nop -command & git -C $gitDir add $gitDir\$post; & git -C $gitDir add $gitDir\$imagePath; & git -C $gitDir commit -m 'updated $postTitle'; & git -C $gitDir push"
                         }
-                        $gitActions += New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-windowstyle hidden -noni -nop -command & git -C $gitDir commit -m 'updated $postTitle'"
-                        $gitActions += New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-windowstyle hidden -noni -nop -command & git -C $gitDir push"
+                        else {
+                            $gitActions = New-ScheduledTaskAction -Execute "powershell.exe" -Argument `
+                            "-windowstyle hidden -noni -nop -command & git -C $gitDir add $gitDir\$post; & git -C $gitDir commit -m 'updated $postTitle'; & git -C $gitDir push" 
+                        }
                         
                         # Define trigger at post date
                         $schedTrigger = New-ScheduledTaskTrigger -Once -At $postDate
