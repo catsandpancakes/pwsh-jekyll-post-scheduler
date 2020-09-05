@@ -25,16 +25,16 @@ date: yyyy-MM-dd HH:mm
 ---
 ```
 
-**NOTE1:** If your resources/images directory **does not contain a subdirectory for each post**, comment lines **31 and 32**, and uncomment lines **35 and 36**.
+**NOTE1:** If your resources/images directory **does not contain a subdirectory for each post**, comment lines **39 and 40**, and uncomment lines **43 and 44**.
 
-**NOTE2:** If your resources/images directory **is not named images**, please change it on either lines **31 and 32** or lines **35 and 36**. If your resources/images **are not .png files**, please change them on the same lines as well. See the following code block for an example of what needs to be changed: 
+**NOTE2:** If your resources/images directory **is not named images**, please change it on either lines **39 and 40** or lines **43 and 44**. If your resources/images **are not .png files**, please change them on the same lines as well. See the following code block for an example of what needs to be changed: 
 
 ```
-31 $imageFullPath = Get-Content $post | Select-String -NoEmphasis -Raw "(!\[.*.EXTENSION\]\(\/RESOURCEDIR\/.*\/)" | Select-Object -First 1
-32 $imagePath = ($imageFullPath -split "(RESOURCEDIR\/.*\/)")[1]
+39 $imageFullPath = Get-Content $post | Select-String -NoEmphasis -Raw "(!\[.*.EXTENSION\]\(\/RESOURCEDIR\/.*\/)" | Select-Object -First 1
+40 $imagePath = ($imageFullPath -split "(RESOURCEDIR\/.*\/)")[1]
 
-35 $imageFullPath = Get-Content $post | Select-String -NoEmphasis -Raw "(!\[.*.EXTENSION\]\(\/RESOURCEDIR\/)" | Select-Object -First 1
-36 $imagePath = ($imageFullPath -split "(RESOURCEDIR\/)")[1]
+43 $imageFullPath = Get-Content $post | Select-String -NoEmphasis -Raw "(!\[.*.EXTENSION\]\(\/RESOURCEDIR\/)" | Select-Object -First 1
+44 $imagePath = ($imageFullPath -split "(RESOURCEDIR\/)")[1]
 ```
 
 ## How to Use
