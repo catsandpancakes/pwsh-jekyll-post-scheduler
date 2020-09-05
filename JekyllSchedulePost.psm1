@@ -1,3 +1,11 @@
+#############################################
+# Author: ricepancakes                      #
+# GitHub: github.com/catsandpancakes        #
+# Contact: ricepancakes@protonmail.com      #
+#                                           #
+# Licensed under the MIT license.           #
+#############################################
+
 function JekyllSchedulePost(){
     $global:error.Clear()
 
