@@ -1,1 +1,1 @@
-# pwsh-jekyll-scheduled-task
+# Jekyll Post Scheduler (PowerShell)
