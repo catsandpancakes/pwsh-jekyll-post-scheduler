@@ -53,7 +53,7 @@ Once the module is imported, run `JekyllSchedulePost` in your terminal where you
 ```vbscript
 Dim wShell
 Set wShell = CreateObject("Wscript.Shell")
-wShell.Run "$git-commands-here"
+wShell.Run "$git-commands-here", 0
 ...
 Set wShell = Nothing
 ```
