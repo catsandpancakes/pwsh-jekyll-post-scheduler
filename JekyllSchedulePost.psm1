@@ -21,7 +21,7 @@ function JekyllSchedulePost(){
         Write-Host "Please run this script in a valid Git repository.`n" -BackgroundColor Red -ForegroundColor White
     }
     else{
-        if($status -match "Untracked files" -and "_posts"){
+        if($status -match "Untracked files" -and $status -match "_posts"){
             Write-Host "Scheduling commit...`n"
 
             $posts = $status | findstr -i "_posts"
@@ -59,16 +59,40 @@ function JekyllSchedulePost(){
                         $post = $post -replace "/", "\"
                         $imagePath = $imagePath -replace "/", "\"
 
-                        # Create scheduled task - git add, git commit, git push
-                        if($imagePath -ne ""){
-                            $gitActions = New-ScheduledTaskAction -Execute "powershell.exe" -Argument `
-                            "-windowstyle hidden -noni -nop -command & git -C $gitDir add $gitDir\$post; & git -C $gitDir add $gitDir\$imagePath; & git -C $gitDir commit -m 'updated $postTitle'; & git -C $gitDir push"
-                        }
-                        else {
-                            $gitActions = New-ScheduledTaskAction -Execute "powershell.exe" -Argument `
-                            "-windowstyle hidden -noni -nop -command & git -C $gitDir add $gitDir\$post; & git -C $gitDir commit -m 'updated $postTitle'; & git -C $gitDir push" 
-                        }
+                        # Build .vbs file.
+                        $vbsDir = "$env:LOCALAPPDATA\JekyllSchedule\"
+                        $vbsFile = "JekyllScheduledPost_$postTitle.vbs"
+                        $vbsPath = "$vbsDir$vbsFile"
                         
+                        # Create directory if it doesn't exist.
+                        if(-not(Test-Path $vbsDir)){
+                            New-Item -ItemType Directory $vbsDir > $null
+                        }
+
+                        # Clear vbs script if it already exists, if not create it.
+                        if(-not(Test-Path $vbsPath)){
+                            New-Item $vbsPath > $null
+                        }
+                        else{
+                            Clear-Content $vbsPath
+                        }
+
+                        # Add all necessary contents.
+                        Add-Content $vbsPath "Dim wShell"
+                        Add-Content $vbsPath "Set wShell = CreateObject(`"Wscript.Shell`")"
+                        Add-Content $vbsPath "wShell.Run `"git -C $gitDir add $post`", 0"
+
+                        if($imagePath -ne ""){
+                            Add-Content $vbsPath "wShell.Run `"git -C $gitDir add $imagePath`", 0"
+                        }
+
+                        Add-Content $vbsPath "wShell.Run `"git -C $gitDir commit -m 'updated $postTitle'`", 0"
+                        Add-Content $vbsPath "wShell.Run `"git -C $gitDir push`", 0"
+                        Add-Content $vbsPath "Set wShell = Nothing"
+
+                        # Create scheduled task - run wscript and call vbs file.
+                        $gitActions = New-ScheduledTaskAction -Execute "wscript.exe" -argument "$vbsPath"
+
                         # Define trigger at post date
                         $schedTrigger = New-ScheduledTaskTrigger -Once -At $postDate
                         
@@ -94,8 +118,8 @@ function JekyllSchedulePost(){
                         Write-Host "Please manually commit $post and $imagePath.`n" -BackgroundColor Yellow -ForegroundColor Black
                     }
                 }catch{
-                    if($global:error -match "was not recognized as a valid DateTime"){
-                        Write-Host "Invalid date. Skipping $post."
+                    if($global:error -match "was not recognized as a valid DateTime" -or $global:error -match "properties do not match any of the parameters that take pipeline input"){
+                        Write-Host "Invalid date. Skipping $post." -BackgroundColor Yellow -ForegroundColor Black
                     }
                     else{
                         Write-Host "Unspecified error. Skipping $post.`nSee the following error message for more details:`n" -BackgroundColor Red -ForegroundColor White
@@ -112,12 +136,14 @@ function JekyllSchedulePost(){
 
 function JekyllCleanScheduledPost(){
     $tasks = Get-ScheduledTask | Where-Object TaskName -Match "JekyllScheduledPost" | Get-ScheduledTaskInfo | Select-Object TaskName, NextRunTime
+    $vbsDir = "$env:LOCALAPPDATA\JekyllSchedule\"
 
     foreach($task in $tasks){
         try{
             if($task.NextRunTime -eq $null){
                 Write-Host "$($task.TaskName) has expired. Deleting..." -BackgroundColor Yellow -ForegroundColor Black
                 Unregister-ScheduledTask -TaskName $task.TaskName -Confirm:$false -ErrorAction Stop
+                Remove-Item "$vbsDir$($task.TaskName).vbs" -Confirm:$false -ErrorAction Stop
                 Write-Host "$($task.TaskName) deleted.`n" -BackgroundColor Green -ForegroundColor Black
             }
         }catch{
