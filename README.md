@@ -43,13 +43,23 @@ Download the JekyllSchedulePost.psm1 file and make the necessary changes as list
 
 Once the module is imported, run `JekyllSchedulePost` in your terminal where your Git repository is located. 
 
-## Known Issues
+## How It Works
 
-All versions of PowerShell, when run with the `-WindowStyle Hidden` switch will briefly flash the PowerShell console window. This may cause some minor disruption to full screen applications. This cannot be fixed as of now. Even if the scheduled task calls `git.exe` directly, it will also briefly flash the CMD console window.
+1. Run `git status` to determine if there are any uncommitted posts inside the `/_posts/` folder. 
+2. Look inside each uncommitted post to get the datetime from the front matter. 
+3. At the same time, also look for any images in the format of `![image.png](/path/to/image.png)` and extract the image path to be committed. 
+4. If a future datetime is found in the front matter, start to create the following VBScript inside `C:\Users\Username\Appdata\Local\JekyllSchedule\`: 
 
-There is an [issue on the PowerShell GitHub repository](https://github.com/PowerShell/PowerShell/issues/3028) that has been open since January 2017. A future version may fix this issue, and that future version may be coming quite soon if the issue thread is to be believed. 
+```vbscript
+Dim wShell
+Set wShell = CreateObject("Wscript.Shell")
+wShell.Run "$git-commands-here"
+...
+Set wShell = Nothing
+```
 
-There is a way to do this with a very dirty workaround by creating VBScripts to execute each `git.exe` command. Each VBScript will in turn be executed by WScript in the Task Scheduler. VBScripts will need to be stored somewhere until the task is executed, and automatically removing said VBScripts would also cause a console window to briefly flash unless that is also done with WScript and yet another VBScript... which feels like a really dirty way of doing things.
+5. After that, create a new Windows Scheduled Task to run `WScript.exe script.vbs`. 
+6. The script will automatically clean up old scheduled tasks and .vbs scripts on every run.
 
 ## Contact
 
