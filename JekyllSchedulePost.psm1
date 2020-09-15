@@ -91,7 +91,7 @@ function JekyllSchedulePost(){
                         Add-Content $vbsPath "Set wShell = Nothing"
 
                         # Create scheduled task - run wscript and call vbs file.
-                        $gitActions = New-ScheduledTaskAction -Execute "wscript.exe" -argument "$vbsPath"
+                        $gitActions = New-ScheduledTaskAction -Execute "wscript.exe" -argument "`"$vbsPath`""
 
                         # Define trigger at post date
                         $schedTrigger = New-ScheduledTaskTrigger -Once -At $postDate
