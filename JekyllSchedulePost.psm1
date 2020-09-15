@@ -86,7 +86,7 @@ function JekyllSchedulePost(){
                             Add-Content $vbsPath "wShell.Run `"git -C $gitDir add $imagePath`", 0"
                         }
 
-                        Add-Content $vbsPath "wShell.Run `"git -C $gitDir commit -m 'updated $postTitle'`", 0"
+                        Add-Content $vbsPath "wShell.Run `"git -C $gitDir commit -m `"`"updated $postTitle`"`"`", 0"
                         Add-Content $vbsPath "wShell.Run `"git -C $gitDir push`", 0"
                         Add-Content $vbsPath "Set wShell = Nothing"
 
