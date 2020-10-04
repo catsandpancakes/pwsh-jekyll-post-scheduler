@@ -63,6 +63,7 @@ function JekyllSchedulePost(){
                         $vbsDir = "$env:LOCALAPPDATA\JekyllSchedule\"
                         $vbsFile = "JekyllScheduledPost_$postTitle.vbs"
                         $vbsPath = "$vbsDir$vbsFile"
+                        $vbsSleep = "WScript.Sleep(5000)"
                         
                         # Create directory if it doesn't exist.
                         if(-not(Test-Path $vbsDir)){
@@ -77,17 +78,17 @@ function JekyllSchedulePost(){
                             Clear-Content $vbsPath
                         }
 
-                        # Add all necessary contents.
+                        # Add content for vbs file, wait for process to finish executing before continuing.
                         Add-Content $vbsPath "Dim wShell"
                         Add-Content $vbsPath "Set wShell = CreateObject(`"Wscript.Shell`")"
-                        Add-Content $vbsPath "wShell.Run `"git -C $gitDir add $post`", 0"
+                        Add-Content $vbsPath "wShell.Run `"git -C $gitDir add $post`", 0, true"
 
                         if($imagePath -ne ""){
-                            Add-Content $vbsPath "wShell.Run `"git -C $gitDir add $imagePath`", 0"
+                            Add-Content $vbsPath "wShell.Run `"git -C $gitDir add $imagePath`", 0, true"
                         }
 
-                        Add-Content $vbsPath "wShell.Run `"git -C $gitDir commit -m `"`"updated $postTitle`"`"`", 0"
-                        Add-Content $vbsPath "wShell.Run `"git -C $gitDir push`", 0"
+                        Add-Content $vbsPath "wShell.Run `"git -C $gitDir commit -m `"`"updated $postTitle`"`"`", 0, true"
+                        Add-Content $vbsPath "wShell.Run `"git -C $gitDir push`", 0, true"
                         Add-Content $vbsPath "Set wShell = Nothing"
 
                         # Create scheduled task - run wscript and call vbs file.
